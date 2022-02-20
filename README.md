@@ -1,10 +1,10 @@
-# Quasar App (kamand)
+# kamand ui
 
 A Quasar Framework app
 
 ## Install the dependencies
 ```bash
-yarn
+yarn instal
 ```
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
