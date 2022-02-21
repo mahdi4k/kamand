@@ -1,0 +1,34 @@
+//for change global default input style focus
+.q-field__control:after, .q-field__control:before {
+  border-width: 1px !important;
+  border: solid #058AB5;
+  border-radius: 8px;
+}
+
+//for change global default input style when highlighted
+.q-field--highlighted .q-field__control:after {
+  border-width: 1px !important;
+  border-style: solid;
+  border-color: #058AB5 !important;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  transform: unset !important;
+  border-radius: 8px;
+}
+
+//for change global default input style hover
+.q-field__control:hover:before {
+  border-color: #A9B5C6 !important;
+  box-shadow: 0 0 0 3px #F4FAFB;
+}
+
+.inputs-form {
+  //change global default select box style
+  .q-field__control:before {
+    border: 1px solid #A9B5C6;
+    border-radius: 8px;
+  }
+
+  .input-title {
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,26 @@
+//expansion sidebar menu style
+.q-page-container .q-expansion-item__container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
+
+  .q-item {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 8px;
+
+    .q-focus-helper {
+      visibility: hidden;
+    }
+
+    button {
+      .q-focus-helper {
+        visibility: visible !important;
+      }
+    }
+
+    .q-item__section--side {
+      padding-left: 10px;
+    }
+  }
+}
