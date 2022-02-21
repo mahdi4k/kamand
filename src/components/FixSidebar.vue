@@ -1,67 +1,22 @@
 <template>
   <div class="flex sidebar">
-    <a @click="drawerToggle"  href="#" class="text-center q-mt-md">
+    <a @click="drawerToggle" href="#" class="text-center q-mt-md">
       <img
         alt="collapse"
         src="~assets/icons/sidebar/Collapse.svg"
       >
     </a>
 
-    <q-list  dense class="fix-sidebar q-my-auto">
-      <q-item  clickable v-ripple>
+    <q-list dense class="fix-sidebar q-my-auto">
+      <q-item :active="activeMenu === menu.id" v-for="(menu) in menus" @click="setActiveMenu(menu.id)" clickable
+              v-ripple>
         <q-item-section class="sidebar-items">
-          <img
-            alt="داشبورد"
-            src="~assets/icons/sidebar/Dashboard.svg"
-          >
-          <span>داشبورد</span>
-        </q-item-section>
-      </q-item>
-
-      <q-item active clickable v-ripple>
-        <q-item-section class="sidebar-items">
-          <img
-            alt="اطلاعات پایه"
-            src="~assets/icons/sidebar/Repair.svg"
-          >
-          <span>اطلاعات پایه</span>
-        </q-item-section>
-      </q-item>
-
-      <q-item clickable v-ripple>
-        <q-item-section class="sidebar-items">
-          <img
-            alt="برنامه‌ریزی"
-            src="~assets/icons/sidebar/Program.svg"
-          >
-          <span>برنامه‌ریزی</span>
-        </q-item-section>
-      </q-item>
-      <q-item clickable v-ripple>
-        <q-item-section class="sidebar-items">
-          <img
-            alt="گزارشات"
-            src="~assets/icons/sidebar/Reports.svg"
-          >
-          <span>گزارشات</span>
-        </q-item-section>
-      </q-item>
-      <q-item clickable v-ripple>
-        <q-item-section class="sidebar-items">
-          <img
-            alt="پارامترهای سیستمی"
-            src="~assets/icons/sidebar/Parameters.svg"
-          >
-          <span>پارامترهای سیستمی</span>
-        </q-item-section>
-      </q-item>
-      <q-item clickable v-ripple>
-        <q-item-section class="sidebar-items">
-          <img
-            alt="اعلان‌ها"
-            src="~assets/icons/sidebar/Notification.svg"
-          >
-          <span>اعلان‌ها</span>
+          <q-img
+            :alt="menu.title"
+            :src="menu.icon"
+            style="width:22px"
+          />
+          <span>{{ menu.title }}</span>
         </q-item-section>
       </q-item>
     </q-list>
@@ -70,28 +25,71 @@
 </template>
 
 <script>
+import {EventBus} from "src/EventBus";
+
 export default {
   name: "FixSidebar",
-  data(){
-    return{
-
+  data() {
+    return {
+      menus: [
+        {
+          title: 'داشبورد',
+          icon: './icons/sidebar/Dashboard.svg',
+          id: 1
+        },
+        {
+          title: 'اطلاعات پایه',
+          icon: './icons/sidebar/Repair.svg',
+          id: 2
+        },
+        {
+          title: 'برنامه‌ریزی',
+          icon: './icons/sidebar/Program.svg',
+          id: 3
+        },
+        {
+          title: 'گزارشات',
+          icon: './icons/sidebar/Reports.svg',
+          id: 4
+        },
+        {
+          title: 'پارامترهای سیستمی',
+          icon: './icons/sidebar/Parameters.svg',
+          id: 5
+        },
+        {
+          title: 'اعلان‌ها',
+          icon: './icons/sidebar/Notification.svg',
+          id: 6
+        },
+      ],
+      activeMenu: 1
     }
   },
-  methods:{
-    drawerToggle(){
-      this.$emit('drawerShow', 'clicked')
+  methods: {
+    drawerToggle() {
+      EventBus.$emit('drawerShow', 'clicked')
+    },
+    setActiveMenu(val) {
+      this.activeMenu = val
+      // for check active is dashboard then hide mainSidebar
+      EventBus.$emit('activeMenu', this.activeMenu)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.bg-sidebar {
-  background-color: #035670;
+.q-drawer--left {
+  left: 4%;
 }
-.q-item--active{
+
+
+
+.q-item--active {
   background-color: #003546;
 }
+
 .q-item {
   padding-right: 0 !important;
   padding-left: 0 !important;
@@ -103,7 +101,7 @@ export default {
   min-width: 3.6%;
   max-width: 4%;
   flex-direction: column;
-  background-color: #035670;
+  background-color: $fix-bgSidebar;
 
   .fix-sidebar {
     overflow: hidden;
