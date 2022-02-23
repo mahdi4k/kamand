@@ -1,8 +1,8 @@
 {
   "name": "kamand",
   "version": "0.0.1",
-  "description": "kamand app",
-  "productName": "kamand",
+  "description": "سامانه جامع برنامه‌ریزی و کنترل تولید",
+  "productName": "برنامه‌ریزی و کنترل تولید",
   "author": "",
   "private": true,
   "scripts": {
