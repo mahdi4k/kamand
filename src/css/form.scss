@@ -23,9 +23,12 @@
 
 .inputs-form {
   //change global default select box style
-  .q-field__control:before {
+  .q-field__control:before{
     border: 1px solid #A9B5C6;
     border-radius: 8px;
+  }
+  .q-field__control:after{
+    border-radius: 8px
   }
 
   .input-title {

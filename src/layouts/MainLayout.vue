@@ -7,7 +7,11 @@
       <MainSidebar/>
 
       <q-page-container class="col">
-        <router-view/>
+        <q-page class="flex">
+          <q-page-container class="container container" style="padding-right: 62px !important">
+            <router-view/>
+          </q-page-container>
+        </q-page>
       </q-page-container>
     </div>
   </q-layout>
@@ -16,8 +20,8 @@
 <script>
 
 
-import FixSidebar from "components/FixSidebar";
-import MainSidebar from "components/MainSidebar";
+import FixSidebar from "components/sidebar/FixSidebar";
+import MainSidebar from "components/sidebar/MainSidebar";
 
 export default {
   name: 'MainLayout',
