@@ -1,86 +1,68 @@
 <template>
-  <q-page class="flex">
-
-    <q-page-container class="container container" style="padding-right: 62px !important">
-
-      <div class="features">
-        <p class="title">مشخصات</p>
-        <q-expansion-item v-model="expanded">
-          <template v-slot:header>
-
-            <q-item-section>
-              در این بخش می‌توانید مشخصات را وارد کنید
-            </q-item-section>
-
-            <q-item-section side>
-              <div class="row items-center">
-                <q-btn v-if="!expanded" class="btn-boxShadow" outline style="color: #089562" label="افزودن"/>
-                <q-btn v-else flat label="بستن"/>
+      <AccordionMenu
+        headerTitle="مشخصات"
+        accordionTitle="در این بخش می‌توانید مشخصات را وارد کنید"
+        @add-button-clicked="focusInput()"
+      >
+        <slot>
+          <q-form
+            @submit="onSubmit"
+            class="q-gutter-md"
+          >
+            <div class="q-gutter-sm items-end inputs-form row ">
+              <div class="col">
+                <span class="input-title">عنوان</span>
+                <q-input ref="focus" dense v-model="featuresInputData.title" outlined type="text" placeholder="عنوان"/>
               </div>
-            </q-item-section>
-          </template>
 
-          <q-card>
-            <q-card-section>
-              <div class="q-pa-md">
-                <q-form
-                  @submit="onSubmit"
-                  class="q-gutter-md"
-                >
-                  <div class="q-gutter-sm items-end inputs-form row ">
-                    <div class="col">
-                      <span class="input-title">عنوان</span>
-                      <q-input dense v-model="featuresInputData.title" outlined type="text" placeholder="عنوان"/>
-                    </div>
-
-                    <div class="col">
-                      <span class="input-title">کد</span>
-                      <q-input dense width="37" v-model="featuresInputData.title" outlined type="text"
-                               placeholder="کد"/>
-                    </div>
-
-                    <div class="col">
-                      <span class="input-title">نوع</span>
-                      <q-select use-input dense class="inputs-col" outlined v-model="featuresInputData.type"
-                                :options="options"
-                                placeholder="نوع"/>
-                    </div>
-
-                    <div class="col">
-                      <span class="input-title">تگ</span>
-                      <q-select use-input dense outlined v-model="featuresInputData.title" :options="options"
-                                placeholder="تگ"/>
-                    </div>
-
-                    <div class="col">
-                      <span class="input-title">دسته‌بندی</span>
-                      <q-select use-input dense outlined v-model="featuresInputData.title" :options="options"
-                                placeholder="دسته‌بندی"/>
-                    </div>
-
-                    <div>
-                      <q-btn label="افزودن" type="submit" color="primary"/>
-                    </div>
-                  </div>
-                </q-form>
+              <div class="col">
+                <span class="input-title">کد</span>
+                <q-input dense width="37" v-model="featuresInputData.code" outlined type="text"
+                          placeholder="کد"/>
               </div>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-      </div>
 
-    </q-page-container>
+              <div class="col">
+                <span class="input-title">نوع</span>
+                <q-select use-input dense class="inputs-col" outlined v-model="featuresInputData.type"
+                          :options="options"
+                          :placeholder="!featuresInputData.type ? 'نوع' : ''"/>
+              </div>
 
-  </q-page>
+              <div class="col">
+                <span class="input-title">تگ</span>
+                <q-select use-input dense outlined v-model="featuresInputData.tag" :options="options"
+                          :placeholder="!featuresInputData.tag ? 'تگ' : ''"/>
+              </div>
+
+              <div class="col">
+                <span class="input-title">دسته‌بندی</span>
+                <q-select use-input dense outlined v-model="featuresInputData.category" :options="options"
+                          :placeholder="!featuresInputData.category ? 'دسته‌بندی' : ''"/>
+              </div>
+
+              <div>
+                <q-btn label="افزودن" type="submit" color="primary"/>
+              </div>
+            </div>
+          </q-form>
+        </slot>
+      </AccordionMenu>
 
 </template>
 
 <script>
+import AccordionMenu from "components/AccordionMenu";
+
 export default {
-  name: 'PageIndex',
+  name: 'Features',
+  meta: {
+    // sets document title
+    title: 'برنامه‌ریزی و کنترل تولید - مشخصه‌‌ها',
+
+  },
+  components: {AccordionMenu},
   data() {
     return {
-      expanded: false,
       featuresInputData: {
         title: null,
         code: null,
@@ -95,6 +77,14 @@ export default {
   },
   methods: {
     onSubmit() {
+
+    },
+    focusInput(){
+
+      setTimeout(() => {
+
+        this.$refs.focus.focus()
+      }, 100)
 
     }
   }
