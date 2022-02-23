@@ -1,5 +1,5 @@
 <template>
-  <div class="flex sidebar">
+  <div class="flex no-wrap sidebar">
     <a @click="drawerToggle" href="#" class="text-center q-mt-md">
       <img
         alt="collapse"
@@ -8,7 +8,7 @@
     </a>
 
     <q-list dense class="fix-sidebar q-my-auto">
-      <q-item :active="activeMenu === menu.id" v-for="(menu) in menus" @click="setActiveMenu(menu.id)" clickable
+      <q-item :active="activeMenu === menu.id" v-for="(menu) in menus" :key="menu.id" @click="setActiveMenu(menu.id)" clickable
               v-ripple>
         <q-item-section class="sidebar-items">
           <q-img
@@ -98,11 +98,12 @@ export default {
 .sidebar {
   height: 100vh;
   z-index: 1001;
-  min-width: 3.6%;
-  max-width: 4%;
+  width: 4%;
   flex-direction: column;
   background-color: $fix-bgSidebar;
-
+  @media (max-width:1100px ) {
+    width: 6%;
+  }
   .fix-sidebar {
     overflow: hidden;
 
