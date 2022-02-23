@@ -22,5 +22,14 @@ $positive  : #21BA45;
 $negative  : #C10015;
 $info      : #31CCEC;
 $warning   : #F2C037;
+
+
+//custom scss
 $button-font-size : 15px;
-$button-shadow :  0
+$button-shadow :  0;
+//fix-sidebar
+$fix-bgSidebar : #035670;
+$fix-activeBgSidebar : #003546;
+//main-sidebar
+$active-mainSideBar : linear-gradient(270deg, #058BB6 100%, #007499 0%);
+$main-sidebar-font-size : 13px;

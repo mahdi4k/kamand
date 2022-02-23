@@ -87,7 +87,7 @@ export default {
 
 
 .q-item--active {
-  background-color: #003546;
+  background-color: $fix-activeBgSidebar;
 }
 
 .q-item {

@@ -165,7 +165,7 @@ export default {
   }
 
   .sidebarItem {
-    font-size: 13px;
+    font-size: $main-sidebar-font-size;
     .q-focus-helper {
       visibility: hidden;
     }
@@ -197,7 +197,7 @@ export default {
           color: #697387;
           .q-item{
             margin-bottom: 5px;
-            font-size: 13px;
+            font-size: $main-sidebar-font-size;
           }
         }
       }
@@ -218,9 +218,9 @@ export default {
           max-width: 85%;
           padding: 6px 0 4px 13px;
           border-radius: 8px;
-          background: linear-gradient(270deg, #058BB6 100%, #007499 0%);
+          background: $active-mainSideBar;
           color: white;
-          font-size: 13px;
+          font-size: $main-sidebar-font-size;
           position: relative;
           right: 8%;
         }
