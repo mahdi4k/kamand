@@ -1,0 +1,15 @@
+
+  .q-focus-helper{
+    background-color: $selectBoxFocusBg !important;
+  }
+
+
+.multiSelect{
+  padding-left: 0;
+  .multiSelectSection{
+    display: flex;
+    .q-checkbox__bg{
+      border-radius: 25%;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 @import "fonts";
 @import "variables";
 @import "form";
+@import "multiSelect";
 @import "expansion";
 body {
   font-family: Shabnam, serif;
@@ -9,8 +10,17 @@ body {
 #q-app {
   background-color: $bgApp;
 }
+.d-grid{
+  display: grid;
+}
+.grid-column{
+  grid-auto-flow : column;
+}
 .border-radius{
   border-radius: 8px;
+}
+.border-radius-dialog{
+  border-radius: 16px !important;
 }
 .container {
   padding: 55px 62px 0 0;
@@ -19,6 +29,7 @@ body {
   .title {
     font-weight: bold;
     font-size: 16px;
+    margin-bottom: 10px;
   }
 }
 .br-line{
