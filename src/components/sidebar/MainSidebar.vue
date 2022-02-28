@@ -98,9 +98,14 @@
       >
         <q-card>
           <q-list dense padding>
+            <q-item :to="{name:'shift'}" class="childExpansionItem" clickable v-ripple>
+              <q-item-section>
+                تعریف شیفت کاری
+              </q-item-section>
+            </q-item>
             <q-item class="childExpansionItem" clickable v-ripple>
               <q-item-section>
-                شیفت کاری
+                تعریف الگوی کاری
               </q-item-section>
             </q-item>
           </q-list>
