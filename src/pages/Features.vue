@@ -13,26 +13,50 @@
           <div class="q-gutter-sm items-end inputs-form row ">
             <div class="col">
               <span class="input-title">عنوان</span>
-              <q-input ref="focus" dense v-model="featuresInputData.title" outlined type="text" placeholder="عنوان"/>
+              <q-input :rules="[val => !!val || 'عنوان را وارد کنید']" ref="focus" dense
+                       v-model="featuresInputData.title" outlined type="text" placeholder="عنوان"/>
             </div>
 
             <div class="col">
               <span class="input-title">کد</span>
-              <q-input dense width="37" v-model="featuresInputData.code" outlined type="text"
+              <q-input :rules="[val => !!val || 'کد را وارد کنید']" dense width="37" v-model="featuresInputData.code"
+                       outlined type="text"
                        placeholder="کد"/>
             </div>
 
             <div class="col">
               <span class="input-title">نوع</span>
-              <q-select use-input dense class="inputs-col" outlined v-model="featuresInputData.type"
+              <q-select :rules="[val => !!val || 'نوع را وارد کنید']" use-input dense class="inputs-col" outlined
+                        v-model="featuresInputData.type"
                         :options="options"
-                        :placeholder="!featuresInputData.type ? 'نوع' : ''"/>
+                        :placeholder="!featuresInputData.type ? 'نوع' : ''">
+                <template v-slot:append>
+                  <q-icon
+                    v-if="featuresInputData.type !== null && featuresInputData.type && featuresInputData.type.length !== 0"
+                    class="cursor-pointer"
+                    name="cancel"
+                    @click.stop="featuresInputData.type = null"
+                  />
+                </template>
+
+              </q-select>
             </div>
 
             <div class="col">
               <span class="input-title">تگ</span>
-              <q-select use-input dense outlined v-model="featuresInputData.tag" :options="options"
-                        :placeholder="!featuresInputData.tag ? 'تگ' : ''"/>
+              <q-select multiple
+                        emit-value use-input dense outlined v-model="featuresInputData.tag" :options="options"
+                        :placeholder="!featuresInputData.tag ? 'تگ' : ''">
+                <template v-slot:append>
+                  <q-icon
+                    v-if="featuresInputData.tag !== null && featuresInputData.tag && featuresInputData.tag.length !== 0"
+                    class="cursor-pointer"
+                    name="cancel"
+                    @click.stop="featuresInputData.tag = null"
+                  />
+                </template>
+
+              </q-select>
             </div>
 
             <div class="col">
@@ -46,6 +70,7 @@
                 :options="options"
                 :placeholder="!featuresInputData.category ? 'دسته‌بندی' : ''"
                 multiple
+                emit-value
                 dense
                 map-options
               >
@@ -57,21 +82,29 @@
                   >
 
                     <div class="multiSelectSection">
-                      <q-item-section >
+                      <q-item-section>
                         <q-checkbox color="cyan-10" :value="selected" @input="toggleOption(opt)"></q-checkbox>
                       </q-item-section>
                       <q-item-section>
-                        <q-item-label v-html="opt.label" ></q-item-label>
+                        <q-item-label v-html="opt.label"></q-item-label>
                       </q-item-section>
                     </div>
 
                   </q-item>
                 </template>
+                <template v-slot:append>
+                  <q-icon
+                    v-if="featuresInputData.category !== null && featuresInputData.category && featuresInputData.category.length !== 0"
+                    class="cursor-pointer"
+                    name="cancel"
+                    @click.stop="featuresInputData.category = null"
+                  />
+                </template>
               </q-select>
             </div>
 
             <div>
-              <q-btn label="افزودن" type="submit" color="primary"/>
+              <q-btn label="افزودن" type="submit" :color="activeFormButton ? 'green-9' : 'primary'"/>
             </div>
           </div>
         </q-form>
@@ -83,16 +116,18 @@
     <p class="title q-mt-xl">مدیریت مشخصات</p>
     <q-table
       class=" border-radius k-grid "
-      :data="data"
-      :columns="columns"
+      :data="table.data"
+      :columns="table.columns"
+      :pagination.sync="pagination"
       separator="vertical"
+      :loading="tableLoading"
       hide-header
       hide-bottom
       row-key="name"
     >
       <template v-slot:top>
         <q-form
-          @submit="onSubmit"
+          @submit="filterSubmit"
           class="full-width"
         >
 
@@ -102,23 +137,23 @@
             </div>
 
             <div class="col">
-              <q-input ref="focus" dense v-model="featuresInputData.title" outlined type="text" placeholder="عنوان"/>
+              <q-input dense v-model="filter.title" outlined type="text" placeholder="عنوان"/>
             </div>
 
             <div class="col">
-              <q-input dense width="37" v-model="featuresInputData.code" outlined type="text"
+              <q-input dense width="37" v-model="filter.code" outlined type="text"
                        placeholder="کد"/>
             </div>
 
             <div class="col">
-              <q-select use-input dense class="inputs-col" outlined v-model="featuresInputData.type"
+              <q-select use-input dense class="inputs-col" outlined v-model="filter.type"
                         :options="options"
-                        :placeholder="!featuresInputData.type ? 'نوع' : ''"/>
+                        :placeholder="!filter.type ? 'نوع' : ''"/>
             </div>
 
             <div class="col">
-              <q-select use-input dense outlined v-model="featuresInputData.tag" :options="options"
-                        :placeholder="!featuresInputData.tag ? 'تگ' : ''"/>
+              <q-select use-input dense outlined v-model="filter.tag" :options="options"
+                        :placeholder="!filter.tag ? 'تگ' : ''"/>
             </div>
 
             <div class="col flex no-wrap">
@@ -127,9 +162,9 @@
                 multiple
                 use-input
                 dense outlined
-                v-model="featuresInputData.category"
+                v-model="filter.category"
                 :options="options"
-                :placeholder="!featuresInputData.category ? 'دسته‌بندی' : ''"/>
+                :placeholder="!filter.category ? 'دسته‌بندی' : ''"/>
               <div>
                 <q-btn class="filter-btn-dense" color="primary">
                   <q-icon color="accent" size="22px">
@@ -161,9 +196,6 @@
           </div>
           <div class="col detail">
             <span key="name" :props="props" class="input-title">{{ props.row.calcium }}</span>
-          </div>
-          <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.fat }}</span>
           </div>
           <div class="last-col-table">
             <!--            parameter-->
@@ -206,12 +238,15 @@
         </div>
 
       </template>
+      <template v-slot:loading>
+        <q-inner-loading showing color="blue-4"/>
+      </template>
     </q-table>
     <div class="row justify-between q-mt-md">
       <q-pagination
         v-model="pagination.page"
         color="grey-8"
-        :max="pagesNumber"
+        :max="5"
         boundary-numbers
         class="btn-pagination"
         size="sm"
@@ -254,7 +289,7 @@
         </q-card-section>
         <q-card-section class="row">
           <div class="col-4 q-pr-sm q-mb-md">
-            <q-input ref="focus" dense v-model="edit.title" outlined type="text" placeholder="عنوان"/>
+            <q-input dense v-model="edit.title" outlined type="text" placeholder="عنوان"/>
           </div>
 
           <div class="col-4 q-pr-sm q-mb-md">
@@ -312,7 +347,7 @@
           <div v-for="(parameter,index) in parameterRow">
             <q-input dense width="37" v-model="parameter.value" outlined type="text"
                      placeholder="پارامتر"/>
-            <q-btn @click="removeRow(index)"   class="filter-btn-dense" color="primary">
+            <q-btn @click="removeRow(index)" class="filter-btn-dense" color="primary">
               <q-icon color="accent" size="22px">
                 <img
                   alt="Add"
@@ -333,6 +368,7 @@
 
 <script>
 import AccordionMenu from "components/AccordionMenu";
+import {api} from "boot/axios";
 
 export default {
   name: 'Features',
@@ -345,6 +381,7 @@ export default {
   data() {
     return {
       type: null,
+      tableLoading: false,
       options: [
         {
           label: 'عمومی',
@@ -360,74 +397,57 @@ export default {
         },
 
       ],
-      optionPageSelect: [1, 5, 10, 15],
+       optionPageSelect: [1, 5, 10, 15],
       removeDialog: false,
       parameter: [],
       parameterRow: [],
+      activeFormButton: false,
       editDialog: false,
       parameterDialog: false,
       pagination: {
-        sortBy: 'desc',
-        descending: false,
-        page: 3,
-        rowsPerPage: 3
-        // rowsNumber: xx if getting data from a server
+        sortBy: null,
+        filterString: null,
+        page: 1,
+        rowsPerPage: 10,
+        rowsNumber: 2
       },
-      pagesNumber: 2,
-      columns: [
-        {
-          name: 'name',
-          required: true,
-          label: 'Dessert (100g serving)',
-          align: 'left',
-          field: row => row.name,
-          sortable: true
-        },
+      table:{
+        columns: [
+          {
+            name: 'name',
+            required: true,
+            label: 'Dessert (100g serving)',
+            align: 'left',
+            field: row => row.name,
+            sortable: true
+          },
 
-        {name: 'carbs', label: 'Carbs (g)', field: 'carbs'},
-        {name: 'protein', label: 'Protein (g)', field: 'protein'},
-        {name: 'sodium', label: 'Sodium (mg)', field: 'sodium'},
-        {
-          name: 'calcium',
-          label: 'Calcium (%)',
-          field: 'calcium',
-          sortable: true,
-          sort: (a, b) => parseInt(a, 10) - parseInt(b, 10)
-        },
-        {
-          name: 'iron',
-          label: 'Iron (%)',
-          field: 'iron',
-          sortable: true,
-          sort: (a, b) => parseInt(a, 10) - parseInt(b, 10)
-        }
-      ],
-      data: [
-        {
-          name: 1,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-          sodium: 87,
-          calcium: '14%',
-        },
-        {
-          name: 2,
-          fat: 'آج',
-          carbs: 224,
-          protein: 'لیست',
-          sodium: 'DRI-Co',
-          calcium: 'درخت تجهیز',
-        }, {
-          name: 2,
-          fat: 'آج',
-          carbs: 224,
-          protein: 'لیست',
-          sodium: 'DRI-Co',
-          calcium: 'درخت تجهیز',
-        },
-      ],
+          {name: 'carbs', label: 'Carbs (g)', field: 'carbs'},
+          {name: 'protein', label: 'Protein (g)', field: 'protein'},
+          {name: 'sodium', label: 'Sodium (mg)', field: 'sodium'},
+          {
+            name: 'calcium',
+            label: 'Calcium (%)',
+            field: 'calcium',
+            sortable: true,
+          },
+          {
+            name: 'iron',
+            label: 'Iron (%)',
+            field: 'iron',
+            sortable: true,
+          }
+        ],
+        data: [],
+      },
       featuresInputData: {
+        title: null,
+        code: null,
+        type: null,
+        tag: null,
+        category: null
+      },
+      filter: {
         title: null,
         code: null,
         type: null,
@@ -444,10 +464,67 @@ export default {
     }
   },
   methods: {
+    async getTableData(props) {
+      const {
+        page,
+        rowsPerPage,
+        filterString,
+      } = props.pagination;
+
+      await api.get(`features?perPage=${rowsPerPage}&page=${page}&${filterString}`)
+        .then(res => {
+        console.log(res.data)
+          let dataTable = res.data.data
+          this.updatePagination({
+            meta: res.data.meta,
+            sortBy: null,
+            filterString: filterString
+          });
+          this.table.data = dataTable.length > 0 ? this.prepareDataForTable(dataTable) : null
+        })
+    },
+    updatePagination(obj) {
+      obj.hasOwnProperty('sortBy') ? this.pagination.sortBy = obj.sortBy : '';
+      obj.hasOwnProperty('filterString') ? this.pagination.filterString = obj.filterString : '';
+      if (obj.hasOwnProperty('meta')) {
+        this.pagination.rowsNumber = obj.meta.total;
+        this.pagination.page = obj.meta.current_page;
+        this.pagination.rowsPerPage = obj.meta.per_page;
+      }
+    },
+    prepareDataForTable(data) {
+      console.log(data)
+      let tableData = [];
+      data.forEach((item, index) => {
+        let object = {
+          id: item.id,
+          index: (this.pagination.page - 1) * this.pagination.rowsPerPage + index + 1,
+          destination: item.destination.name,
+          subcategory: item.subcategory.name,
+          description: item.description,
+          trucks: item.trucks,
+        }
+
+
+        tableData.push(object);
+      });
+      return tableData;
+    },
+
     onSubmit() {
+      let data = {
+        dataType : this.this.featuresInputData.type.value,
+        subcategories : this.this.featuresInputData.category,
+        tags: this.featuresInputData.tag,
+        name : this.featuresInputData.title,
+        code : this.featuresInputData.code
+      }
+      this.tableLoading = false
+    },
+    filterSubmit() {
 
     },
-    focusInput(){
+    focusInput() {
 
       setTimeout(() => {
 
@@ -455,11 +532,26 @@ export default {
       }, 100)
 
     },
-    addRow(){
-      this.parameterRow.push({value :null})
+    addRow() {
+      this.parameterRow.push({value: null})
     },
-    removeRow(index){
-      console.log(this.parameterRow.splice(index,1))
+    removeRow(index) {
+      console.log(this.parameterRow.splice(index, 1))
+    }
+  },
+  mounted() {
+    this.getTableData({pagination: this.pagination})
+  },
+  watch: {
+    featuresInputData: {
+      deep: true,
+      handler() {
+        if (this.featuresInputData['type'] && this.featuresInputData['title'] && this.featuresInputData['code']) {
+          return this.activeFormButton = true
+        } else {
+          return this.activeFormButton = false
+        }
+      }
     }
   }
 }
