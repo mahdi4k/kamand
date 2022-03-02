@@ -58,7 +58,7 @@
 
                     <div class="multiSelectSection">
                       <q-item-section >
-                        <q-checkbox :value="selected" @input="toggleOption(opt)"></q-checkbox>
+                        <q-checkbox color="cyan-10" :value="selected" @input="toggleOption(opt)"></q-checkbox>
                       </q-item-section>
                       <q-item-section>
                         <q-item-label v-html="opt.label" ></q-item-label>
