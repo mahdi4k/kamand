@@ -44,8 +44,8 @@
 
             <div class="col">
               <span class="input-title">تگ</span>
-              <q-select multiple
-                        emit-value use-input dense outlined v-model="featuresInputData.tag" :options="options"
+              <q-select
+                         use-input dense outlined v-model="featuresInputData.tag" :options="options"
                         :placeholder="!featuresInputData.tag ? 'تگ' : ''">
                 <template v-slot:append>
                   <q-icon
@@ -116,6 +116,7 @@
     <p class="title q-mt-xl">مدیریت مشخصات</p>
     <q-table
       class=" border-radius k-grid "
+      no-data-label="I didn't find anything for you"
       :data="table.data"
       :columns="table.columns"
       :pagination.sync="pagination"
@@ -125,6 +126,7 @@
       hide-bottom
       row-key="name"
     >
+
       <template v-slot:top>
         <q-form
           @submit="filterSubmit"
@@ -183,19 +185,22 @@
       <template v-slot:body="props">
         <div class="row q-gutter-sm q-mt-none relative-position q-ml-none tableRows">
           <div class="first-col-table">
-            <span key="name" :props="props" class="input-title">{{ props.row.name }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.index }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.carbs }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.title }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.protein }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.code }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.sodium }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.type }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.calcium }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.tag }}</span>
+          </div>
+          <div class="col detail">
+            <span key="name" :props="props" class="input-title">{{ props.row.category }}</span>
           </div>
           <div class="last-col-table">
             <!--            parameter-->
@@ -223,7 +228,7 @@
               </q-tooltip>
             </q-btn>
             <!--            remove-->
-            <q-btn @click="removeDialog = !removeDialog" class="btn-dense" color="white">
+            <q-btn @click="removeDialog = !removeDialog;deleteItemId=props.row.index" class="btn-dense" color="white">
               <q-icon color="accent" size="22px">
                 <img
                   alt="Remove"
@@ -242,7 +247,7 @@
         <q-inner-loading showing color="blue-4"/>
       </template>
     </q-table>
-    <div class="row justify-between q-mt-md">
+    <div class="row hidden justify-between q-mt-md">
       <q-pagination
         v-model="pagination.page"
         color="grey-8"
@@ -274,7 +279,7 @@
 
         <q-card-actions align="center">
           <q-btn class="cancel-btn" outline color="blue-grey-2" label="انصراف" v-close-popup></q-btn>
-          <q-btn class="q-px-md" color="green-9" text-color="white" label="بله"></q-btn>
+          <q-btn class="q-px-md" color="green-9" @click="removeRowTable()" text-color="white" label="بله"></q-btn>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -385,20 +390,21 @@ export default {
       options: [
         {
           label: 'عمومی',
-          value: 1
+          value: 'عمومی'
         },
         {
           label: 'پر خطر',
-          value: 2
+          value: 'پر خطر'
         },
         {
           label: 'الکترود',
-          value: 3
+          value: 'الکترود'
         },
 
       ],
        optionPageSelect: [1, 5, 10, 15],
       removeDialog: false,
+      deleteItemId:null,
       parameter: [],
       parameterRow: [],
       activeFormButton: false,
@@ -414,31 +420,47 @@ export default {
       table:{
         columns: [
           {
-            name: 'name',
-            required: true,
-            label: 'Dessert (100g serving)',
-            align: 'left',
-            field: row => row.name,
-            sortable: true
+            name: 'index',
+            label: 'ردیف',
+            align: 'center',
           },
 
-          {name: 'carbs', label: 'Carbs (g)', field: 'carbs'},
-          {name: 'protein', label: 'Protein (g)', field: 'protein'},
-          {name: 'sodium', label: 'Sodium (mg)', field: 'sodium'},
+          {name: 'code', label: 'کد', field: 'code'},
+          {name: 'type', label: 'نوع', field: 'type'},
+          {name: 'tag', label: ' تگ', field: 'tag'},
           {
-            name: 'calcium',
-            label: 'Calcium (%)',
-            field: 'calcium',
+            name: 'category',
+            label: 'دسته‌بندی',
+            field: 'category',
             sortable: true,
           },
-          {
-            name: 'iron',
-            label: 'Iron (%)',
-            field: 'iron',
-            sortable: true,
-          }
         ],
-        data: [],
+        data: [
+          {
+            index: 1,
+            title: 'تست 1',
+            code: 12,
+            type: 'پرخطر',
+            tag: 'عمومی',
+            category: 'عمومی,پرخطر'
+          },
+          {
+            index: 2,
+            title: 'تست 12',
+            code: 33,
+            type: 'پرخطر',
+            tag: 'عمومی',
+            category: 'عمومی,پرخطر'
+          },
+          {
+            index: 3,
+            title: 'تست 13',
+            code: 34,
+            type: 'پرخطر',
+            tag: 'عمومی',
+            category: 'عمومی,پرخطر'
+          },
+        ],
       },
       featuresInputData: {
         title: null,
@@ -473,14 +495,13 @@ export default {
 
       await api.get(`features?perPage=${rowsPerPage}&page=${page}&${filterString}`)
         .then(res => {
-        console.log(res.data)
           let dataTable = res.data.data
           this.updatePagination({
             meta: res.data.meta,
             sortBy: null,
             filterString: filterString
           });
-          this.table.data = dataTable.length > 0 ? this.prepareDataForTable(dataTable) : null
+         // this.table.data = dataTable.length > 0 ? this.prepareDataForTable(dataTable) : []
         })
     },
     updatePagination(obj) {
@@ -493,7 +514,6 @@ export default {
       }
     },
     prepareDataForTable(data) {
-      console.log(data)
       let tableData = [];
       data.forEach((item, index) => {
         let object = {
@@ -504,22 +524,56 @@ export default {
           description: item.description,
           trucks: item.trucks,
         }
-
-
         tableData.push(object);
       });
       return tableData;
     },
 
     onSubmit() {
-      let data = {
-        dataType : this.this.featuresInputData.type.value,
-        subcategories : this.this.featuresInputData.category,
-        tags: this.featuresInputData.tag,
-        name : this.featuresInputData.title,
-        code : this.featuresInputData.code
-      }
-      this.tableLoading = false
+      // let data = {
+      //   dataType : this.featuresInputData.type.label,
+      //   subcategories : this.featuresInputData.category.toString(),
+      //   tags: this.featuresInputData.tag.label,
+      //   name : this.featuresInputData.title,
+      //   code : this.featuresInputData.code
+      // }
+
+
+      // api.post('features',data).then(res=>{
+      //   console.log(res)
+      // }).catch(err=>{
+      //   console.log(err)
+      // })
+
+      this.tableLoading = true
+      this.timer = setTimeout(()=>{
+        let data = {
+          index: this.table.data.length + 1,
+          type : this.featuresInputData.type.label,
+          category : this.featuresInputData.category.toString(),
+          tag: this.featuresInputData.tag.label,
+          title : this.featuresInputData.title,
+          code : this.featuresInputData.code
+        }
+        this.table.data.push(data)
+        this.clearForm()
+        this.tableLoading = false
+        this.$refs.focus.focus()
+
+        this.$q.notify({
+          type: 'positive',
+          message: `مشخصه با موفقیت ثبت شد`
+        })
+        this.timer = void 0
+      },1000)
+
+    },
+    clearForm(){
+      this.featuresInputData.tag = null
+      this.featuresInputData.title = null
+      this.featuresInputData.code = null
+      this.featuresInputData.category = null
+      this.featuresInputData.type = null
     },
     filterSubmit() {
 
@@ -534,6 +588,10 @@ export default {
     },
     addRow() {
       this.parameterRow.push({value: null})
+    },
+    removeRowTable(){
+      let id = Number(this.deleteItemId) - 1
+      this.table.data.splice(id, 1)
     },
     removeRow(index) {
       console.log(this.parameterRow.splice(index, 1))
