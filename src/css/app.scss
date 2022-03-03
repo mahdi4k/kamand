@@ -13,6 +13,9 @@ body {
 .d-grid{
   display: grid;
 }
+.q-field--with-bottom{
+  padding-bottom: 0 !important;
+}
 .grid-column{
   grid-auto-flow : column;
 }
