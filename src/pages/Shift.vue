@@ -78,6 +78,7 @@
     <q-table
       class=" border-radius k-grid "
       :data="data"
+      :loading="loading"
       separator="vertical"
       hide-header
       hide-bottom
@@ -120,15 +121,15 @@
       <template v-slot:body="props">
         <div class="row q-gutter-sm q-mt-none relative-position q-ml-none tableRows">
           <div class="first-col-table">
-            <span key="name" :props="props" class="input-title">{{ props.row.name }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.number }}</span>
           </div>
 
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.protein }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.type }}</span>
           </div>
 
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.fat }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.title }}</span>
           </div>
           <div class="last-col-table">
             <!--            parameter-->
@@ -170,6 +171,9 @@
           </div>
         </div>
 
+      </template>
+      <template v-slot:loading>
+        <q-inner-loading showing color="primary" />
       </template>
     </q-table>
     <!--  end table  -->
@@ -292,26 +296,15 @@
           <div class="self-center first-col-table">
             <span>عنوان</span>
           </div>
-          <q-input dense width="37" v-model="parameter" outlined type="text"
+          <q-input dense width="37" v-model="title" outlined type="text"
                    placeholder="عنوان"/>
 
 
-          <q-btn  color="primary"  style="width: 320px;margin-top: 15px">
+          <q-btn  :color="[title ? 'green-9' : 'primary']" :disable="title"
+                  @click="saveShift"
+                  style="width: 320px;margin-top: 15px">
             افزودن
-
           </q-btn>
-          <div v-for="(parameter,index) in parameterRow">
-            <q-input dense width="37" v-model="parameter.value" outlined type="text"
-                     placeholder="پارامتر"/>
-            <q-btn @click="removeRow(index)" class="filter-btn-dense" color="primary">
-              <q-icon color="accent" size="22px">
-                <img
-                  alt="Add"
-                  src="~assets/icons/Add.svg"
-                >
-              </q-icon>
-            </q-btn>
-          </div>
 
         </q-card-section>
 
@@ -335,6 +328,8 @@ export default {
   components: {AccordionMenu},
   data() {
     return {
+      title:null,
+      loading:false,
       headerTitle: 'مدیریت شیفت کاری',
       brStyle: 'border: solid 1px #c4c4c4;border-radius: 6px;',
       disable: true,
@@ -350,18 +345,18 @@ export default {
       shiftDialog: false,
       data: [
         {
-          name: 1,
-          fat: 'سه شیفته',
-          protein: 'A',
+          number: 1,
+          type: 'سه شیفته',
+          title: 'A',
         },
         {
-          name: 2,
-          fat: 'سه شیفته',
-          protein: 'B',
+          number: 2,
+          type: 'سه شیفته',
+          title: 'B',
         }, {
-          name: 3,
-          fat: 'سه شیفته',
-          protein: 'C',
+          number: 3,
+          type: 'سه شیفته',
+          title: 'C',
         },
       ],
       featuresInputData: {
@@ -375,7 +370,14 @@ export default {
     }
   },
   methods: {
+    saveShift(){
+      this.options.push(this.title);
+      this.title='';
+      this.shiftDialog=false;
+      this.type=this.options[this.options.length -1];
+    },
     onSubmit() {
+      this.loading=true;
 
     },
     addRow1() {
