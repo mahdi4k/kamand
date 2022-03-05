@@ -125,11 +125,11 @@
           </div>
 
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.type }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.title }}</span>
           </div>
 
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.title }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.type }}</span>
           </div>
           <div class="last-col-table">
             <!--            parameter-->
@@ -207,31 +207,16 @@
           </div>
         </q-card-section>
         <q-card-section class="row">
-          <div class="col-4 q-pr-sm q-mb-md">
+          <div class="col q-pr-sm q-mb-md">
             <q-input ref="focus" dense v-model="edit.title" outlined type="text" placeholder="عنوان"/>
           </div>
 
-          <div class="col-4 q-pr-sm q-mb-md">
-            <q-input dense width="37" v-model="edit.code" outlined type="text"
-                     placeholder="کد"/>
-          </div>
-
-          <div class="col-4 q-pr-sm q-mb-md">
+          <div class="col q-pr-sm q-mb-md">
             <q-select use-input dense class="inputs-col" outlined v-model="edit.type"
                       :options="options"
-                      :placeholder="!edit.type ? 'نوع' : ''"/>
+                      :placeholder="!edit.type ? 'نوع شیفت' : ''"/>
           </div>
 
-          <div class="col-4 q-pr-sm q-mb-md">
-            <q-select use-input dense outlined v-model="edit.tag" :options="options"
-                      :placeholder="!edit.tag ? 'تگ' : ''"/>
-          </div>
-
-          <div class="col-4 q-pr-sm q-mb-md">
-            <q-select class="full-width" use-input dense outlined v-model="edit.category"
-                      :options="options"
-                      :placeholder="!edit.category ? 'دسته‌بندی' : ''"/>
-          </div>
         </q-card-section>
 
         <q-card-actions class="q-pr-lg" align="right">
@@ -297,6 +282,7 @@
             <span>عنوان</span>
           </div>
           <q-input dense width="37" v-model="title" outlined type="text"
+                   autofocus
                    placeholder="عنوان"/>
 
 
@@ -336,7 +322,7 @@ export default {
       icon: 'img:./icons/add-disable.svg',
       type: null,
       options: ['دو شیفته', 'سه شیفته'],
-      categories: [{id: 1, name: "A"}, {id: 2, name: "B"}],
+      categories: [],
       removeDialog: false,
       parameter: [],
       parameterRow: [],
@@ -378,7 +364,17 @@ export default {
     },
     onSubmit() {
       this.loading=true;
+      this.timer = setTimeout(()=>{
 
+        this.loading = false
+
+        this.$q.notify({
+          type: 'negative',
+          position:'top',
+          message: `مشکل در برقراری ارتباط با سرور`
+        })
+        this.timer = void 0
+      },1000)
     },
     addRow1() {
       this.parameterRow.push({value: null})
@@ -425,7 +421,6 @@ export default {
 
 .new-row {
   max-height: 258px;
-  overflow-y: scroll
 }
 
 .separator-hr {
