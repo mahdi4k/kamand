@@ -8,6 +8,7 @@
       <slot>
         <q-form
           @submit="onSubmit"
+          ref="formSubmit"
           class="q-gutter-md"
         >
           <div class="q-gutter-sm items-end inputs-form row ">
@@ -26,9 +27,10 @@
 
             <div class="col">
               <span class="input-title">نوع</span>
-              <q-select :rules="[val => !!val || 'نوع را وارد کنید']" use-input dense class="inputs-col" outlined
+              <q-select :rules="[val => !!val || 'نوع را وارد کنید']" use-input dense class="inputs-col hide-caret"
+                        outlined
                         v-model="featuresInputData.type"
-                        :options="options"
+                        :options="typeOptions"
                         :placeholder="!featuresInputData.type ? 'نوع' : ''">
                 <template v-slot:append>
                   <q-icon
@@ -44,9 +46,37 @@
 
             <div class="col">
               <span class="input-title">تگ</span>
+
               <q-select
-                         use-input dense outlined v-model="featuresInputData.tag" :options="options"
-                        :placeholder="!featuresInputData.tag ? 'تگ' : ''">
+                class="hide-caret"
+                use-input
+                outlined
+                v-model="featuresInputData.tag"
+                :options="options"
+                :placeholder="!featuresInputData.tag ? 'تگ' : ''"
+                multiple
+                emit-value
+                dense
+                map-options
+              >
+                <template v-slot:option="{ itemProps, itemEvents, opt, selected, toggleOption }">
+                  <q-item
+                    v-bind="itemProps"
+                    v-on="itemEvents"
+                    class="multiSelect"
+                  >
+
+                    <div class="multiSelectSection">
+                      <q-item-section>
+                        <q-checkbox color="cyan-10" :value="selected" @input="toggleOption(opt)"></q-checkbox>
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label v-html="opt.label"></q-item-label>
+                      </q-item-section>
+                    </div>
+
+                  </q-item>
+                </template>
                 <template v-slot:append>
                   <q-icon
                     v-if="featuresInputData.tag !== null && featuresInputData.tag && featuresInputData.tag.length !== 0"
@@ -55,8 +85,9 @@
                     @click.stop="featuresInputData.tag = null"
                   />
                 </template>
-
               </q-select>
+
+
             </div>
 
             <div class="col">
@@ -64,6 +95,7 @@
 
 
               <q-select
+                class="hide-caret"
                 use-input
                 outlined
                 v-model="featuresInputData.category"
@@ -119,7 +151,7 @@
       no-data-label="I didn't find anything for you"
       :data="table.data"
       :columns="table.columns"
-      :pagination.sync="pagination"
+      :pagination="pagination"
       separator="vertical"
       :loading="tableLoading"
       hide-header
@@ -194,17 +226,20 @@
             <span key="name" :props="props" class="input-title">{{ props.row.code }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.type }}</span>
+            <span key="name" :props="props"
+                  class="input-title">{{ props.row.type.label ? props.row.type.label : props.row.type }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.tag }}</span>
+            <span key="name" :props="props"
+                  class="input-title">{{ props.row.tag.label ? props.row.tag.label : props.row.tag }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.category }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.category.toString() }}</span>
           </div>
           <div class="last-col-table">
             <!--            parameter-->
-            <q-btn @click="parameterDialog = !parameterDialog" class="btn-dense" color="white">
+            <q-btn :disable="props.row.type!=='لیست'" @click="parameterDialog = !parameterDialog" class="btn-dense"
+                   color="white">
               <q-icon color="accent" size="22px">
                 <img
                   alt="Parameters"
@@ -216,7 +251,7 @@
               </q-tooltip>
             </q-btn>
             <!--            edit-->
-            <q-btn @click="editDialog = !editDialog" class="btn-dense" color="white">
+            <q-btn @click="prepareEditData(props.row.index)" class="btn-dense" color="white">
               <q-icon color="accent" size="22px">
                 <img
                   alt="Edit"
@@ -264,7 +299,7 @@
       </div>
     </div>
 
-    <!--    dialog section-->
+    <!--  remove  dialog section-->
     <q-dialog v-model="removeDialog">
       <q-card class="q-pa-lg border-radius-dialog" style="width: 400px">
         <q-card-section class="d-grid text-right grid-column items-center q-pb-none">
@@ -284,50 +319,139 @@
       </q-card>
     </q-dialog>
 
+    <!--  edit dialog section-->
     <q-dialog v-model="editDialog">
       <q-card class="q-pa-lg border-radius-dialog" style="width: 700px; max-width: 80vw;">
-        <q-card-section class="d-grid text-right grid-column items-center q-pb-none">
-          <div class="text-h6">ویرایش</div>
-          <div>
-            <q-btn icon="close" flat round dense v-close-popup/>
-          </div>
-        </q-card-section>
-        <q-card-section class="row">
-          <div class="col-4 q-pr-sm q-mb-md">
-            <q-input dense v-model="edit.title" outlined type="text" placeholder="عنوان"/>
-          </div>
+        <q-form
+          @submit="editTableData"
+          ref="formSubmit"
+          class="q-gutter-md"
+        >
+          <q-card-section class="d-grid text-right grid-column items-center q-pb-none">
+            <div class="text-h6">ویرایش</div>
+            <div>
+              <q-btn icon="close" flat round dense v-close-popup/>
+            </div>
+          </q-card-section>
+          <q-card-section class="row inputs-form">
+            <div class="col-4 q-pr-sm q-mb-md">
+              <span class="input-title">عنوان</span>
+              <q-input :rules="[val => !!val || 'عنوان را وارد کنید']" dense v-model="edit.title" outlined type="text"
+                       placeholder="عنوان"/>
+            </div>
 
-          <div class="col-4 q-pr-sm q-mb-md">
-            <q-input dense width="37" v-model="edit.code" outlined type="text"
-                     placeholder="کد"/>
-          </div>
+            <div class="col-4 q-pr-sm q-mb-md">
+              <span class="input-title">کد</span>
 
-          <div class="col-4 q-pr-sm q-mb-md">
-            <q-select use-input dense class="inputs-col" outlined v-model="edit.type"
-                      :options="options"
-                      :placeholder="!edit.type ? 'نوع' : ''"/>
-          </div>
+              <q-input :rules="[val => !!val || 'کد را وارد کنید']" dense width="37" v-model="edit.code" outlined
+                       type="text"
+                       placeholder="کد"/>
+            </div>
 
-          <div class="col-4 q-pr-sm q-mb-md">
-            <q-select use-input dense outlined v-model="edit.tag" :options="options"
-                      :placeholder="!edit.tag ? 'تگ' : ''"/>
-          </div>
+            <div class="col-4 q-pr-sm q-mb-md">
+              <span class="input-title">نوع</span>
+              <q-select :rules="[val => !!val || 'نوع را وارد کنید']" use-input dense class="inputs-col" outlined
+                        v-model="edit.type"
+                        :options="typeOptions"
+                        :placeholder="!edit.type ? 'نوع' : ''"/>
+            </div>
 
-          <div class="col-4 q-pr-sm q-mb-md">
-            <q-select class="full-width" use-input dense outlined v-model="edit.category"
-                      :options="options"
-                      :placeholder="!edit.category ? 'دسته‌بندی' : ''"/>
-          </div>
-        </q-card-section>
+            <div class="col-4 q-pr-sm q-mb-md">
+              <span class="input-title">تگ</span>
+              <q-select
+                use-input
+                outlined
+                v-model="edit.tag"
+                :options="options"
+                :placeholder="!edit.tag ? 'تگ' : ''"
+                multiple
+                emit-value
+                dense
+                map-options
+              >
+                <template v-slot:option="{ itemProps, itemEvents, opt, selected, toggleOption }">
+                  <q-item
+                    v-bind="itemProps"
+                    v-on="itemEvents"
+                    class="multiSelect"
+                  >
 
-        <q-card-actions class="q-pr-lg" align="right">
-          <q-btn class="q-px-xl" color="primary" label="ویرایش"></q-btn>
-        </q-card-actions>
+                    <div class="multiSelectSection">
+                      <q-item-section>
+                        <q-checkbox color="cyan-10" :value="selected"></q-checkbox>
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label v-html="opt.label"></q-item-label>
+                      </q-item-section>
+                    </div>
+
+                  </q-item>
+                </template>
+                <template v-slot:append>
+                  <q-icon
+                    v-if="edit.tag !== null && edit.tag && edit.tag.length !== 0"
+                    class="cursor-pointer"
+                    name="cancel"
+                    @click.stop="edit.tag = null"
+                  />
+                </template>
+              </q-select>
+            </div>
+
+            <div class="col-4 q-pr-sm q-mb-md">
+              <span class="input-title">دسته‌بندی</span>
+              <q-select
+                use-input
+                outlined
+                v-model="edit.category"
+                :options="options"
+                :placeholder="!edit.category ? 'دسته‌بندی' : ''"
+                multiple
+                emit-value
+                dense
+                map-options
+              >
+                <template v-slot:option="{ itemProps, itemEvents, opt, selected, toggleOption }">
+                  <q-item
+                    v-bind="itemProps"
+                    v-on="itemEvents"
+                    class="multiSelect"
+                  >
+
+                    <div class="multiSelectSection">
+                      <q-item-section>
+                        <q-checkbox color="cyan-10" :value="selected"></q-checkbox>
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label v-html="opt.label"></q-item-label>
+                      </q-item-section>
+                    </div>
+
+                  </q-item>
+                </template>
+                <template v-slot:append>
+                  <q-icon
+                    v-if="edit.category !== null && edit.category && edit.category.length !== 0"
+                    class="cursor-pointer"
+                    name="cancel"
+                    @click.stop="edit.category = null"
+                  />
+                </template>
+              </q-select>
+            </div>
+          </q-card-section>
+
+          <q-card-actions class="q-pr-lg" align="right">
+            <q-btn class="cancel-btn" outline color="blue-grey-2" label="انصراف" v-close-popup></q-btn>
+            <q-btn autofocus type="submit" class="q-px-xl" color="green-9" label="ویرایش"></q-btn>
+          </q-card-actions>
+        </q-form>
       </q-card>
     </q-dialog>
 
+    <!--  parameter dialog section-->
     <q-dialog v-model="parameterDialog">
-      <q-card class="q-pa-lg border-radius-dialog" style="width: 400px">
+      <q-card class="q-pa-lg border-radius-dialog" style="width: 440px">
         <q-card-section class="d-grid text-right grid-column items-center q-pb-none">
           <div>افزودن پارامتر لیست</div>
           <div>
@@ -335,32 +459,47 @@
           </div>
         </q-card-section>
 
-        <q-card-section class="row">
-          <div class="self-center first-col-table">
-            <span>پارامتر</span>
-          </div>
-          <q-input dense width="37" v-model="parameter" outlined type="text"
-                   placeholder="پارامتر"/>
-          <q-btn @click="addRow" :disable="!parameter.length" class="filter-btn-dense" color="primary">
-            <q-icon color="accent" size="22px">
-              <img
-                alt="Add"
-                src="~assets/icons/Add.svg"
-              >
-            </q-icon>
-          </q-btn>
-          <div v-for="(parameter,index) in parameterRow">
-            <q-input dense width="37" v-model="parameter.value" outlined type="text"
-                     placeholder="پارامتر"/>
-            <q-btn @click="removeRow(index)" class="filter-btn-dense" color="primary">
-              <q-icon color="accent" size="22px">
-                <img
-                  alt="Add"
-                  src="~assets/icons/Add.svg"
-                >
-              </q-icon>
-            </q-btn>
-          </div>
+        <q-card-section class="row inputs-form">
+          <q-form
+            @submit="onSubmit"
+            ref="formSubmit"
+          >
+            <div class="full-width flex">
+
+              <div class="self-center first-col-table">
+                <span class="input-title">پارامتر</span>
+              </div>
+              <div :class="index === 0 ?'q-mt-xs' : 'q-mt-md' " class="full-width  flex"
+                   v-for="(parameter,index) in parameterRow">
+                <q-input :rules="[val => !!val || '']" class="col" dense width="37"
+                         v-model="parameter.value" outlined type="text"
+                         placeholder="پارامتر"/>
+                <q-btn v-if="index === 0" outline @click="rowCheck(index)" :disable="!activeParameterButton"
+                       class="filter-btn-dense q-ml-sm"
+                       color="primary">
+                  <q-icon color="accent" size="22px">
+                    <img
+                      alt="Add"
+                      src="~assets/icons/Add.svg"
+                    >
+                  </q-icon>
+                </q-btn>
+                <q-btn v-else outline @click="rowCheck(index)" class="filter-btn-dense q-ml-sm"
+                       color="primary">
+                  <q-icon color="accent" size="22px">
+                    <img
+                      alt="Add"
+                      src="~assets/icons/Remove.svg"
+                    >
+                  </q-icon>
+                </q-btn>
+              </div>
+              <q-btn type="submit" class="q-mt-md full-width" label="افزودن"
+                     color="green-9">
+              </q-btn>
+
+            </div>
+          </q-form>
 
         </q-card-section>
 
@@ -393,8 +532,8 @@ export default {
           value: 'عمومی'
         },
         {
-          label: 'پر خطر',
-          value: 'پر خطر'
+          label: 'پرخطر',
+          value: 'پرخطر'
         },
         {
           label: 'الکترود',
@@ -402,22 +541,40 @@ export default {
         },
 
       ],
-       optionPageSelect: [1, 5, 10, 15],
+      typeOptions: [
+        {
+          label: 'متن',
+          value: 'متن'
+        },
+        {
+          label: 'لیست',
+          value: 'لیست'
+        },
+        {
+          label: 'عدد',
+          value: 'عدد'
+        },
+
+      ],
+      optionPageSelect: [1, 5, 10, 15],
       removeDialog: false,
-      deleteItemId:null,
+      deleteItemId: null,
+      editItemId: null,
       parameter: [],
-      parameterRow: [],
+      parameterRow: [
+        {value: null}
+      ],
       activeFormButton: false,
+      activeParameterButton: false,
       editDialog: false,
       parameterDialog: false,
       pagination: {
-        sortBy: null,
-        filterString: null,
+        sortBy: 'desc',
+        descending: false,
         page: 1,
-        rowsPerPage: 10,
-        rowsNumber: 2
+        rowsPerPage: 10
       },
-      table:{
+      table: {
         columns: [
           {
             name: 'index',
@@ -440,7 +597,7 @@ export default {
             index: 1,
             title: 'تست 1',
             code: 12,
-            type: 'پرخطر',
+            type: 'متن',
             tag: 'عمومی',
             category: 'عمومی,پرخطر'
           },
@@ -448,7 +605,7 @@ export default {
             index: 2,
             title: 'تست 12',
             code: 33,
-            type: 'پرخطر',
+            type: 'لیست',
             tag: 'عمومی',
             category: 'عمومی,پرخطر'
           },
@@ -456,7 +613,7 @@ export default {
             index: 3,
             title: 'تست 13',
             code: 34,
-            type: 'پرخطر',
+            type: 'عدد',
             tag: 'عمومی',
             category: 'عمومی,پرخطر'
           },
@@ -477,6 +634,7 @@ export default {
         category: null
       },
       edit: {
+        index: null,
         title: null,
         code: null,
         type: null,
@@ -501,7 +659,7 @@ export default {
             sortBy: null,
             filterString: filterString
           });
-         // this.table.data = dataTable.length > 0 ? this.prepareDataForTable(dataTable) : []
+          // this.table.data = dataTable.length > 0 ? this.prepareDataForTable(dataTable) : []
         })
     },
     updatePagination(obj) {
@@ -546,29 +704,29 @@ export default {
       // })
 
       this.tableLoading = true
-      this.timer = setTimeout(()=>{
+      this.timer = setTimeout(() => {
         let data = {
           index: this.table.data.length + 1,
-          type : this.featuresInputData.type.label,
-          category : this.featuresInputData.category.toString(),
-          tag: this.featuresInputData.tag.label,
-          title : this.featuresInputData.title,
-          code : this.featuresInputData.code
+          type: this.featuresInputData.type.label,
+          category: this.featuresInputData.category.toString(),
+          tag: this.featuresInputData.tag.toString(),
+          title: this.featuresInputData.title,
+          code: this.featuresInputData.code
         }
         this.table.data.push(data)
         this.clearForm()
         this.tableLoading = false
         this.$refs.focus.focus()
-
+        this.$refs.formSubmit.reset();
         this.$q.notify({
           type: 'positive',
           message: `مشخصه با موفقیت ثبت شد`
         })
         this.timer = void 0
-      },1000)
+      }, 1000)
 
     },
-    clearForm(){
+    clearForm() {
       this.featuresInputData.tag = null
       this.featuresInputData.title = null
       this.featuresInputData.code = null
@@ -586,16 +744,49 @@ export default {
       }, 100)
 
     },
+    rowCheck(index) {
+      index === 0 ? this.addRow() : this.removeRow(index)
+    },
     addRow() {
+
       this.parameterRow.push({value: null})
     },
-    removeRowTable(){
+    removeRow(index) {
+      this.activeParameterButton = true
+      console.log(this.parameterRow.splice(index, 1))
+    },
+    prepareEditData(index) {
+      this.editDialog = !this.editDialog
+      let editData = this.table.data.filter(el => el.index === index)[0]
+      console.log(editData)
+
+      this.editItemId = index
+      this.edit.index = index
+      this.edit.title = editData.title
+      this.edit.code = editData.code
+      this.edit.type = editData.type
+      this.edit.tag = Array.isArray(editData.tag) ? editData.tag : editData.tag.split(",")
+      this.edit.category = Array.isArray(editData.category) ? editData.category : editData.category.split(",")
+    },
+    editTableData() {
+      let findIndex = this.table.data.findIndex(el => (el.index === this.editItemId))
+      this.table.data.splice(findIndex, 1, this.edit)
+      this.editDialog = false
+      this.$q.notify({
+        type: 'positive',
+        message: `مشخصه با موفقیت ویرایش شد`
+      })
+
+    },
+    removeRowTable() {
       let id = Number(this.deleteItemId) - 1
       this.table.data.splice(id, 1)
+      this.$q.notify({
+        type: 'positive',
+        message: `ردیف مورد نظر با موفقیت حذف شد`
+      })
     },
-    removeRow(index) {
-      console.log(this.parameterRow.splice(index, 1))
-    }
+
   },
   mounted() {
     this.getTableData({pagination: this.pagination})
@@ -604,11 +795,19 @@ export default {
     featuresInputData: {
       deep: true,
       handler() {
-        if (this.featuresInputData['type'] && this.featuresInputData['title'] && this.featuresInputData['code']) {
-          return this.activeFormButton = true
-        } else {
-          return this.activeFormButton = false
+        this.activeFormButton = !!(this.featuresInputData['type'] && this.featuresInputData['title'] && this.featuresInputData['code']);
+        if (this.featuresInputData.type && this.featuresInputData.type.label === 'لیست') {
+          this.parameterDialog = true
         }
+      }
+    },
+    parameterRow: {
+      deep: true,
+      handler() {
+        this.parameterRow.map(el => {
+
+          this.activeParameterButton = !(el.value === null || el.value === '');
+        })
       }
     }
   }
@@ -616,5 +815,7 @@ export default {
 </script>
 <style lang="scss">
 @import "src/css/table";
+.q-field__bottom{
 
+}
 </style>

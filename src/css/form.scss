@@ -6,13 +6,32 @@
 }
 
 //for change global default input style when highlighted
-.q-field--highlighted .q-field__control:after {
-  border-width: 1px !important;
-  border-style: solid;
-  border-color: #058AB5 !important;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-  transform: unset !important;
-  border-radius: 8px;
+.q-field--highlighted {
+  &.q-field--error{
+    .q-field__control:after {
+      border-width: 1px !important;
+      border-style: solid;
+      border-color: #FF5555 !important;
+    }
+    &.q-field--focused{
+      .q-field__control:after {
+        box-shadow: 0 0 0 3px #FFD1D1;
+      }
+    }
+  }
+  &.q-field--focused{
+    .q-field__control:after {
+      box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    }
+  }
+  .q-field__control:after {
+    border-width: 1px !important;
+    border-style: solid;
+    border-color: #058AB5 !important;
+    transform: unset !important;
+    border-radius: 8px;
+  }
+
 }
 
 //for change global default input style hover
