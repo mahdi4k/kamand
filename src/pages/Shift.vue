@@ -14,7 +14,9 @@
             <div class="col-2">
               <span class="input-title">نوع شیفت</span>
               <q-select use-input dense class="inputs-col" outlined v-model="type"
-                        :options="options"
+                        :options="typeOfShifts"
+                        option-value="id"
+                        option-label="name"
                         :placeholder="!type ? 'انتخاب' : ''">
                 <template v-slot:after-options>
                   <q-item dir="rtl">
@@ -33,7 +35,7 @@
             </div>
             <div>
               <q-btn label="افزودن" :disable="!(type && categories.length>0)" type="submit"
-                     :color="[type && categories.length>0 ? 'green-9' : 'primary']"/>
+                     :color="(type && categories.length>0 ? 'green-9' : 'primary')"/>
             </div>
           </div>
         </q-form>
@@ -173,7 +175,7 @@
 
       </template>
       <template v-slot:loading>
-        <q-inner-loading showing color="primary" />
+        <q-inner-loading showing color="primary"/>
       </template>
     </q-table>
     <!--  end table  -->
@@ -277,18 +279,18 @@
           </div>
         </q-card-section>
 
-        <q-card-section >
+        <q-card-section>
           <div class="self-center first-col-table">
             <span>عنوان</span>
           </div>
-          <q-input dense width="37" v-model="title" outlined type="text"
+          <q-input dense width="37" v-model="typeOfShift.name" outlined type="text"
                    autofocus
                    placeholder="عنوان"/>
 
 
-          <q-btn  :color="[title ? 'green-9' : 'primary']" :disable="title"
-                  @click="saveShift"
-                  style="width: 320px;margin-top: 15px">
+          <q-btn :color="(title ? 'green-9' : 'primary')" :disable="title"
+                 @click="saveTypeOfShift"
+                 style="width: 320px;margin-top: 15px">
             افزودن
           </q-btn>
 
@@ -303,6 +305,7 @@
 
 <script>
 import AccordionMenu from "components/AccordionMenu";
+import {api} from "boot/axios";
 
 export default {
   name: "Unit.vue",
@@ -311,17 +314,22 @@ export default {
     title: 'برنامه‌ریزی و کنترل تولید - شیفت کاری',
 
   },
+  created() {
+    this.getTypeOfShift();
+  },
   components: {AccordionMenu},
   data() {
     return {
-      title:null,
-      loading:false,
+      title: null,
+      loading: false,
       headerTitle: 'مدیریت شیفت کاری',
       brStyle: 'border: solid 1px #c4c4c4;border-radius: 6px;',
       disable: true,
       icon: 'img:./icons/add-disable.svg',
       type: null,
       options: ['دو شیفته', 'سه شیفته'],
+      typeOfShifts: [],
+      typeOfShift: {name:null},
       categories: [],
       removeDialog: false,
       parameter: [],
@@ -356,25 +364,45 @@ export default {
     }
   },
   methods: {
-    saveShift(){
+    getTypeOfShift() {
+      api.get('shift/type-of-shift/list')
+        .then(response => {
+          console.log(response.data.data);
+          this.typeOfShifts = response.data.data;
+        })
+        .catch(error => {
+          console.log('error');
+        })
+    },
+    saveTypeOfShift() {
+      api.post('shift/type-of-shift',this.typeOfShift)
+        .then(res => {
+            console.log(res.data.data);
+            this.typeOfShifts.push(res.data.data);
+            this.typeOfShift='';
+            this.shiftDialog=false;
+        })
+        .catch(error =>{
+          console.log('error')
+        })
       this.options.push(this.title);
-      this.title='';
-      this.shiftDialog=false;
-      this.type=this.options[this.options.length -1];
+      this.title = '';
+      this.shiftDialog = false;
+      this.type = this.options[this.options.length - 1];
     },
     onSubmit() {
-      this.loading=true;
-      this.timer = setTimeout(()=>{
+      this.loading = true;
+      this.timer = setTimeout(() => {
 
         this.loading = false
 
         this.$q.notify({
           type: 'negative',
-          position:'top',
+          position: 'top',
           message: `مشکل در برقراری ارتباط با سرور`
         })
         this.timer = void 0
-      },1000)
+      }, 1000)
     },
     addRow1() {
       this.parameterRow.push({value: null})
