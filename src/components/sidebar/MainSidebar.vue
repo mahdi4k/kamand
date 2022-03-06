@@ -66,7 +66,7 @@
       >
         <q-card>
           <q-list dense padding>
-            <q-item class="childExpansionItem" clickable v-ripple>
+            <q-item :to="{name:'tag'}" class="childExpansionItem" clickable v-ripple>
               <q-item-section>
                 تگ PLC
               </q-item-section>
