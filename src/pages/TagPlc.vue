@@ -12,7 +12,7 @@
           <div class="q-gutter-sm items-end inputs-form row ">
             <div class="col">
               <span class="input-title">عنوان</span>
-              <q-input ref="focus" dense v-model="form.title"
+              <q-input ref="focus" dense v-model="form.name"
                        outlined type="text" placeholder="عنوان"/>
             </div>
 
@@ -26,18 +26,18 @@
 
             <div class="col">
               <span class="input-title">نوع</span>
-              <q-select use-input dense class="inputs-col" outlined v-model="form.type"
+              <q-select use-input dense class="inputs-col" outlined v-model="form.datatype"
                         :options="typeOfData"
                         option-value="id"
                         option-label="name"
-                        :placeholder="!form.type ? 'انتخاب' : ''">
+                        :placeholder="!form.datatype ? 'انتخاب' : ''">
 
               </q-select>
             </div>
 
             <div class="col">
               <span class="input-title">ضریب</span>
-              <q-input ref="focus" dense v-model="form.coef"
+              <q-input ref="focus" dense v-model="form.factor"
                        outlined type="text" placeholder="ضریب"/>
             </div>
 
@@ -88,7 +88,7 @@
             </div>
 
             <div class="col">
-              <q-input dense v-model="filter.title" outlined type="text" placeholder="عنوان"/>
+              <q-input dense v-model="filter.name" outlined type="text" placeholder="عنوان"/>
             </div>
 
             <div class="col">
@@ -97,15 +97,15 @@
             </div>
 
             <div class="col">
-              <q-select use-input dense class="inputs-col" outlined v-model="filter.type"
+              <q-select use-input dense class="inputs-col" outlined v-model="filter.datatype"
                         :options="typeOfData"
                         option-value="id"
                         option-label="name"
-                        :placeholder="!filter.type ? 'نوع' : ''"/>
+                        :placeholder="!filter.datatype ? 'نوع' : ''"/>
             </div>
 
             <div class="col">
-              <q-input dense v-model="filter.coef" outlined type="text" placeholder="ضریب"/>
+              <q-input dense v-model="filter.factor" outlined type="text" placeholder="ضریب"/>
             </div>
 
             <div class="col flex no-wrap">
@@ -137,26 +137,26 @@
       <template v-slot:body="props">
         <div class="row q-gutter-sm q-mt-none relative-position q-ml-none tableRows">
           <div class="first-col-table">
-            <span key="name" :props="props" class="input-title">{{ props.row.index }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.rowIndex+1 }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.title }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.name }}</span>
           </div>
           <div class="col detail">
             <span key="name" :props="props" class="input-title">{{ props.row.code }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.type }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.datatype }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.coef }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.factor }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.category }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.row.category[0].name }}</span>
           </div>
           <div class="last-col-table">
             <!--            edit-->
-            <q-btn @click="editDialog = !editDialog" class="btn-dense" color="white">
+            <q-btn @click="showEditDialog(props.row.id)" class="btn-dense" color="white">
               <q-icon color="accent" size="22px">
                 <img
                   alt="Edit"
@@ -220,7 +220,7 @@
         </q-card-section>
         <q-card-section class="row">
           <div class="col-4 q-pr-sm q-mb-md">
-            <q-input dense v-model="edit.title" outlined type="text" placeholder="عنوان"
+            <q-input dense v-model="edit.name" outlined type="text" placeholder="عنوان"
                      autofocus/>
           </div>
 
@@ -230,15 +230,15 @@
           </div>
 
           <div class="col-4 q-pr-sm q-mb-md">
-            <q-select use-input dense class="inputs-col" outlined v-model="edit.type"
+            <q-select use-input dense class="inputs-col" outlined v-model="edit.datatype"
                       :options="typeOfData"
                       option-value="id"
                       option-label="name"
-                      :placeholder="!edit.type ? 'نوع' : ''"/>
+                      :placeholder="!edit.datatype ? 'نوع' : ''"/>
           </div>
 
           <div class="col-4 q-pr-sm q-mb-md">
-            <q-input dense width="37" v-model="edit.coef" outlined type="text"
+            <q-input dense width="37" v-model="edit.factor" outlined type="text"
                      placeholder="ضریب"/>
           </div>
 
@@ -270,22 +270,22 @@ import AccordionMenu from "components/AccordionMenu";
 import {api} from "boot/axios";
 
 export default {
-  name: 'Features',
   meta: {
-    title: 'برنامه‌ریزی و کنترل تولید - مشخصه‌‌ها',
+    title: 'برنامه‌ریزی و کنترل تولید - تگ plc',
   }, created() {
     this.getTypeOfData();
     this.getCategories();
+    this.getTags();
   }
   ,
   components: {AccordionMenu},
   data() {
     return {
       form: {
-        title: null,
+        name: null,
         code: null,
-        type: null,
-        coef: null,
+        datatype: null,
+        factor: null,
         category: null
       },
       tableLoading: false,
@@ -307,53 +307,54 @@ export default {
         columns: [
           {name: 'index', label: 'ردیف', align: 'center',},
           {name: 'code', label: 'کد', field: 'code'},
-          {name: 'type', label: 'نوع', field: 'type'},
-          {name: 'coef', label: ' تگ', field: 'tag'},
-          {name: 'category', label: 'دسته‌بندی', field: 'category', sortable: true,},
+          {name: 'name', label: 'عنوان', field: 'name' , sortable: true},
+          {name: 'datatype', label: 'نوع', field: 'datatype'},
+          {name: 'factor', label: ' تگ', field: 'factor'},
+          {name: 'category', label: 'دسته‌بندی', field: 'category',},
         ],
         data: [
           {
-            index: 1,
-            title: 'مصرف آهن اسفنجی',
-            code: 'DRI_CO',
-            type: 'عدد',
-            coef: '1000',
-            category: 'تولید'
-          },
-          {
-            index: 2,
-            title: 'مصرف آب',
-            code: 'WATER-co',
-            type: 'عدد',
-            coef: '1',
-            category: 'آزمایشگاه'
+            code: "02",
+            datatype: "عدد",
+            factor: 1,
+            id: 1,
+            category:[{name: "درخت تجهیز"}, {name: "کلاس و گروه تجهیز"}]
           },
         ],
       },
       filter: {
-        title: null,
+        name: null,
         code: null,
-        type: null,
-        coef: null,
+        datatype: null,
+        factor: null,
         category: null
       },
       edit: {
-        title: null,
+        name: null,
         code: null,
-        type: null,
-        coef: null,
-        category: null
+        datatype: null,
+        factor: null,
+        category: []
       },
     }
   },
   methods: {
+    showEditDialog(id){
+      this.editDialog=true;
+      let index = this.table.data.findIndex(x => x.id === id);
+      let item = this.table.data[index];
+      this.edit.name=item.name;
+      this.edit.code=item.code;
+      this.edit.datatype=item.datatype;
+      this.edit.factor=item.factor;
+      this.edit.category=item.category[0].name;
+    },
     editTag() {
       console.log(this.edit);
     },
     getTypeOfData() {
-      api.get('shift/type-of-shift/list')
+      api.get('unit-types')
         .then(response => {
-          console.log(response.data.data);
           this.typeOfData = response.data.data;
         })
         .catch(error => {
@@ -363,12 +364,20 @@ export default {
     getCategories() {
       api.get('shift/type-of-shift/list')
         .then(response => {
-          console.log(response.data.data);
           this.categories = response.data.data;
         })
         .catch(error => {
           console.log('error');
         })
+    },
+    getTags(){
+      api.get('tags')
+      .then(response =>{
+        console.log(response.data.data);
+        this.table.data = response.data.data ;
+      }).catch(error =>{
+
+      });
     },
     async getTableData(props) {
       const {
@@ -407,6 +416,7 @@ export default {
           subcategory: item.subcategory.name,
           description: item.description,
           trucks: item.trucks,
+
         }
         tableData.push(object);
       });
@@ -425,11 +435,11 @@ export default {
       this.timer = setTimeout(() => {
         this.tableLoading = false;
         this.$refs.focus.focus();
-        this.form.title = null,
+        this.form.name = null,
           this.form.code = null,
-          this.form.type = null,
+          this.form.datatype = null,
           this.form.catgory = null,
-          this.form.coef = null,
+          this.form.factor = null,
           this.$q.notify({
             type: 'positive',
             message: `تگ با موفقیت ثبت شد`
@@ -454,7 +464,7 @@ export default {
     edit: {
       deep: true,
       handler() {
-        if (this.edit.type && this.edit.category && this.edit.coef && this.edit.code && this.edit.title) {
+        if (this.edit.datatype && this.edit.category && this.edit.factor && this.edit.code && this.edit.name) {
           return this.activeEditButton = true
         } else {
           return this.activeEditButton = false
@@ -465,7 +475,7 @@ export default {
     form: {
       deep: true,
       handler() {
-        if (this.form.type && this.form.category && this.form.coef && this.form.code && this.form.title) {
+        if (this.form.datatype && this.form.category && this.form.factor && this.form.code && this.form.name) {
           return this.activeFormButton = true
         } else {
           return this.activeFormButton = false
