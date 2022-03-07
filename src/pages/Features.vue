@@ -198,17 +198,18 @@
                 dense outlined
                 v-model="filter.category"
                 :options="options"
-                :placeholder="!filter.category ? 'دسته‌بندی' : ''"/>
-              <div>
-                <q-btn class="filter-btn-dense" color="primary">
-                  <q-icon color="accent" size="22px">
-                    <img
-                      alt="Filter"
-                      src="~assets/icons/Filter.svg"
-                    >
-                  </q-icon>
-                </q-btn>
-              </div>
+                :placeholder="!filter.category ? 'دسته‌بندی' : ''">
+                <template v-slot:after>
+                  <q-btn class="filter-btn-dense" color="primary">
+                    <q-icon color="accent" size="22px">
+                      <img
+                        alt="Filter"
+                        src="~assets/icons/Filter.svg"
+                      >
+                    </q-icon>
+                  </q-btn>
+                </template>
+              </q-select>
             </div>
 
           </div>
@@ -442,7 +443,7 @@
           </q-card-section>
 
           <q-card-actions class="q-pr-lg" align="right">
-            <q-btn class="cancel-btn" outline color="blue-grey-2" label="انصراف" v-close-popup></q-btn>
+            <q-btn class="secondaryButton" outline color="blue-grey-2" label="انصراف" v-close-popup></q-btn>
             <q-btn autofocus type="submit" class="q-px-xl" color="green-9" label="ویرایش"></q-btn>
           </q-card-actions>
         </q-form>
