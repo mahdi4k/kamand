@@ -43,11 +43,12 @@
 
             <div class="col">
               <span class="input-title">دسته‌بندی</span>
-              <q-select use-input dense class="inputs-col" outlined v-model="form.category"
+              <q-select use-input dense class="inputs-col" outlined v-model="form.categories"
                         :options="categories"
-                        option-value="id"
-                        option-label="name"
-                        :placeholder="!form.category ? 'انتخاب' : ''">
+                        :option-value="(item) => item === null ? null : item.id"
+                        :option-label="(item) => item === null ? 'Null value' : item.name"
+                        multiple
+                        :placeholder="!form.categories ? 'انتخاب' : ''">
 
               </q-select>
             </div>
@@ -115,7 +116,7 @@
                 use-input
                 dense outlined
                 v-model="filter.category"
-                :options="typeOfData"
+                :options="categories"
                 option-value="id"
                 option-label="name"
                 :placeholder="!filter.category ? 'دسته‌بندی' : ''"/>
@@ -137,7 +138,7 @@
       <template v-slot:body="props">
         <div class="row q-gutter-sm q-mt-none relative-position q-ml-none tableRows">
           <div class="first-col-table">
-            <span key="name" :props="props" class="input-title">{{ props.rowIndex+1 }}</span>
+            <span key="name" :props="props" class="input-title">{{ props.rowIndex + 1 }}</span>
           </div>
           <div class="col detail">
             <span key="name" :props="props" class="input-title">{{ props.row.name }}</span>
@@ -152,7 +153,8 @@
             <span key="name" :props="props" class="input-title">{{ props.row.factor }}</span>
           </div>
           <div class="col detail">
-            <span key="name" :props="props" class="input-title">{{ props.row.category[0].name }}</span>
+            <span key="name" :props="props" class="input-title"
+                  v-if="props.row.category.length>0">{{ props.row.category[0].name }}</span>
           </div>
           <div class="last-col-table">
             <!--            edit-->
@@ -168,7 +170,7 @@
               </q-tooltip>
             </q-btn>
             <!--            remove-->
-            <q-btn @click="removeDialog = !removeDialog;deleteItemId=props.row.index" class="btn-dense" color="white">
+            <q-btn @click="deleteTagDialog(props.row.id);deleteItemId=props.rowIndex" class="btn-dense" color="white">
               <q-icon color="accent" size="22px">
                 <img
                   alt="Remove"
@@ -204,7 +206,7 @@
 
         <q-card-actions align="center">
           <q-btn class="cancel-btn" outline color="blue-grey-2" label="انصراف" v-close-popup></q-btn>
-          <q-btn class="q-px-md" color="green-9" @click="removeRowTable()" text-color="white" label="بله"></q-btn>
+          <q-btn class="q-px-md" color="green-9" @click="removeRowTable" text-color="white" label="بله"></q-btn>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -230,11 +232,11 @@
           </div>
 
           <div class="col-4 q-pr-sm q-mb-md">
-            <q-select use-input dense class="inputs-col" outlined v-model="edit.datatype"
+            <q-select use-input dense class="inputs-col" outlined v-model="edit.dataTypeId"
                       :options="typeOfData"
                       option-value="id"
                       option-label="name"
-                      :placeholder="!edit.datatype ? 'نوع' : ''"/>
+                      :placeholder="!edit.dataTypeId ? 'نوع' : ''"/>
           </div>
 
           <div class="col-4 q-pr-sm q-mb-md">
@@ -243,11 +245,11 @@
           </div>
 
           <div class="col-4 q-pr-sm q-mb-md">
-            <q-select class="full-width" use-input dense outlined v-model="edit.category"
+            <q-select class="full-width" use-input dense outlined v-model="edit.categories"
                       :options="categories"
                       option-value="id"
                       option-label="name"
-                      :placeholder="!edit.category ? 'دسته‌بندی' : ''"/>
+                      :placeholder="!edit.categories ? 'دسته‌بندی' : ''"/>
           </div>
         </q-card-section>
 
@@ -286,7 +288,7 @@ export default {
         code: null,
         datatype: null,
         factor: null,
-        category: null
+        categories: []
       },
       tableLoading: false,
       typeOfData: [],
@@ -307,7 +309,7 @@ export default {
         columns: [
           {name: 'index', label: 'ردیف', align: 'center',},
           {name: 'code', label: 'کد', field: 'code'},
-          {name: 'name', label: 'عنوان', field: 'name' , sortable: true},
+          {name: 'name', label: 'عنوان', field: 'name', sortable: true},
           {name: 'datatype', label: 'نوع', field: 'datatype'},
           {name: 'factor', label: ' تگ', field: 'factor'},
           {name: 'category', label: 'دسته‌بندی', field: 'category',},
@@ -318,7 +320,7 @@ export default {
             datatype: "عدد",
             factor: 1,
             id: 1,
-            category:[{name: "درخت تجهیز"}, {name: "کلاس و گروه تجهیز"}]
+            category: [{name: "درخت تجهیز"}, {name: "کلاس و گروه تجهیز"}]
           },
         ],
       },
@@ -332,28 +334,69 @@ export default {
       edit: {
         name: null,
         code: null,
-        datatype: null,
+        dataTypeId: null,
         factor: null,
-        category: []
+        categories: []
       },
+      deleteId:null,
+      editId:null
     }
   },
   methods: {
-    showEditDialog(id){
-      this.editDialog=true;
+    deleteTagDialog(id) {
+      this.removeDialog = true;
+      this.deleteId=id;
+    },
+    removeRowTable() {
+      this.removeDialog=false;
+      api.delete('tags/'+this.deleteId)
+      .then(response=>{
+        if (response.status===200){
+          let index = this.table.data.findIndex(x => x.id === this.deleteId);
+          let item = this.table.data[index];
+          this.table.data.splice(index,1);
+          this.$q.notify({
+            type: 'positive',
+            message: response.data.message
+          })
+        }else {
+          this.$q.notify({
+            type: 'negative',
+            message: response.data.message
+          })
+        }
+      })
+      .catch(error=>{
+        this.$q.notify({
+          type: 'negative',
+          message: error.response.data.message
+        })
+      })
+    }
+    ,
+    showEditDialog(id) {
+      this.editDialog = true;
+      this.editId=id;
       let index = this.table.data.findIndex(x => x.id === id);
       let item = this.table.data[index];
-      this.edit.name=item.name;
-      this.edit.code=item.code;
-      this.edit.datatype=item.datatype;
-      this.edit.factor=item.factor;
-      this.edit.category=item.category[0].name;
+      this.edit.name = item.name;
+      this.edit.code = item.code;
+      this.edit.dataTypeId = 2;
+      this.edit.factor = item.factor;
+      this.edit.categories = [];
     },
     editTag() {
       console.log(this.edit);
+      api.patch('tags/'+this.editId,this.edit)
+        .then(response =>{
+
+        })
+        .catch(error =>{
+
+        })
     },
     getTypeOfData() {
-      api.get('unit-types')
+      api.get('types')
         .then(response => {
           this.typeOfData = response.data.data;
         })
@@ -362,7 +405,7 @@ export default {
         })
     },
     getCategories() {
-      api.get('shift/type-of-shift/list')
+      api.get('categories')
         .then(response => {
           this.categories = response.data.data;
         })
@@ -370,32 +413,14 @@ export default {
           console.log('error');
         })
     },
-    getTags(){
+    getTags() {
       api.get('tags')
-      .then(response =>{
-        console.log(response.data.data);
-        this.table.data = response.data.data ;
-      }).catch(error =>{
+        .then(response => {
+          console.log(response.data.data);
+          this.table.data = response.data.data;
+        }).catch(error => {
 
       });
-    },
-    async getTableData(props) {
-      const {
-        page,
-        rowsPerPage,
-        filterString,
-      } = props.pagination;
-
-      await api.get(`features?perPage=${rowsPerPage}&page=${page}&${filterString}`)
-        .then(res => {
-          let dataTable = res.data.data
-          this.updatePagination({
-            meta: res.data.meta,
-            sortBy: null,
-            filterString: filterString
-          });
-          // this.table.data = dataTable.length > 0 ? this.prepareDataForTable(dataTable) : []
-        })
     },
     updatePagination(obj) {
       obj.hasOwnProperty('sortBy') ? this.pagination.sortBy = obj.sortBy : '';
@@ -425,46 +450,35 @@ export default {
 
     onSubmit() {
       this.tableLoading = true;
-      api.post('tags',this.form)
-      .then(res =>{
+      api.post('tags', this.form)
+        .then(res => {
+          console.log(res.data.tag);
+          this.tableLoading = false;
+          this.table.data.push(res.data.tag)
+          this.$refs.focus.focus();
+          this.form.name = null,
+            this.form.code = null,
+            this.form.datatype = null,
+            this.form.categories = null,
+            this.form.factor = null,
+            this.$q.notify({
+              type: 'positive',
+              message: `تگ با موفقیت ثبت شد`
+            })
+        })
+        .catch(error => {
 
-      })
-      .catch(error =>{
-
-      });
-      this.timer = setTimeout(() => {
-        this.tableLoading = false;
-        this.$refs.focus.focus();
-        this.form.name = null,
-          this.form.code = null,
-          this.form.datatype = null,
-          this.form.catgory = null,
-          this.form.factor = null,
-          this.$q.notify({
-            type: 'positive',
-            message: `تگ با موفقیت ثبت شد`
-          })
-        this.timer = void 0
-      }, 1000)
+        });
 
     },
-    removeRowTable() {
-      let id = Number(this.deleteItemId) - 1
-      this.table.data.splice(id, 1)
-      this.removeDialog = false;
-    },
-    removeRow(index) {
-      console.log(this.parameterRow.splice(index, 1))
-    }
   },
   mounted() {
-    this.getTableData({pagination: this.pagination})
   },
   watch: {
     edit: {
       deep: true,
       handler() {
-        if (this.edit.datatype && this.edit.category && this.edit.factor && this.edit.code && this.edit.name) {
+        if (this.edit.dataTypeId && this.edit.categories && this.edit.factor && this.edit.code && this.edit.name) {
           return this.activeEditButton = true
         } else {
           return this.activeEditButton = false
@@ -475,7 +489,7 @@ export default {
     form: {
       deep: true,
       handler() {
-        if (this.form.datatype && this.form.category && this.form.factor && this.form.code && this.form.name) {
+        if (this.form.datatype && this.form.categories && this.form.factor && this.form.code && this.form.name) {
           return this.activeFormButton = true
         } else {
           return this.activeFormButton = false
