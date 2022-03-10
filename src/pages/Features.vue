@@ -20,7 +20,7 @@
 
             <div class="col">
               <span class="input-title">کد</span>
-              <q-input :rules="[val => !!val || 'کد را وارد کنید']" dense width="37" v-model="featuresInputData.code"
+              <q-input :rules="[val => !!val || 'کد را وارد کنید']" dense v-model="featuresInputData.code"
                        outlined type="text"
                        placeholder="کد"/>
             </div>
@@ -175,7 +175,7 @@
             </div>
 
             <div class="col">
-              <q-input dense width="37" v-model="filter.code" outlined type="text"
+              <q-input dense v-model="filter.code" outlined type="text"
                        placeholder="کد"/>
             </div>
 
@@ -344,7 +344,7 @@
             <div class="col-4 q-pr-sm q-mb-md">
               <span class="input-title">کد</span>
 
-              <q-input :rules="[val => !!val || 'کد را وارد کنید']" dense width="37" v-model="edit.code" outlined
+              <q-input :rules="[val => !!val || 'کد را وارد کنید']" dense v-model="edit.code" outlined
                        type="text"
                        placeholder="کد"/>
             </div>
@@ -472,7 +472,7 @@
               </div>
               <div :class="index === 0 ?'q-mt-xs' : 'q-mt-md' " class="full-width  flex"
                    v-for="(parameter,index) in parameterRow">
-                <q-input :rules="[val => !!val || '']" class="col" dense width="37"
+                <q-input :rules="[val => !!val || '']" class="col" dense
                          v-model="parameter.value" outlined type="text"
                          placeholder="پارامتر"/>
                 <q-btn v-if="index === 0" outline @click="rowCheck(index)" :disable="!activeParameterButton"
@@ -489,7 +489,7 @@
                        color="primary">
                   <q-icon color="accent" size="22px">
                     <img
-                      alt="Add"
+                      alt="Remove"
                       src="~assets/icons/Remove.svg"
                     >
                   </q-icon>

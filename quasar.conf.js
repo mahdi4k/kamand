@@ -44,7 +44,9 @@ module.exports = function (/* ctx */) {
     // Full list of options: https://v1.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: 'hash', // available values: 'hash', 'history'
-
+      env: {
+        API:'http://127.0.0.1:8000/api/v1/'
+      },
       // transpile: false,
 
       // Add dependencies for transpiling with Babel (Array of string/regex)

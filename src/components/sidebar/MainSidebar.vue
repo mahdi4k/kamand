@@ -156,6 +156,9 @@ export default {
 <style lang="scss">
 .q-drawer--left {
   left: 4%;
+  @media (max-width: 1100px) {
+    left: 6%;
+  }
 }
 
 .mainLayout {

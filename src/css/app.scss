@@ -32,7 +32,7 @@ body {
   .title {
     font-weight: bold;
     font-size: 16px;
-    margin-bottom: 10px;
+    color: #323846;
   }
 }
 .br-line{
@@ -43,11 +43,26 @@ body {
   top: 15px;
   background: #CCD9E5;
 }
-
+.btn-dense {
+  .q-btn__wrapper {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+}
+.box-shadow-bottom{
+  box-shadow: 0px -7px 6px 0px #cccccc42 !important;
+}
+.box-shadow-top{
+  box-shadow: 0 8px 8px 0 #ebebeb !important;
+}
 .q-btn {
   border-radius: 6px !important;
 }
-
+.secondaryButton .q-btn__content {
+  span {
+    color: #065A75;
+  }
+}
 .btn-boxShadow {
   box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
 }
